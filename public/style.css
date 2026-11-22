@@ -20,3 +20,17 @@
 @media(max-width:760px){.price-info{padding:12px;flex-wrap:wrap}.overround-pill{white-space:normal}.risk-grid{grid-template-columns:1fr}.risk-head{align-items:flex-start;flex-direction:column}.move-indicator{display:block;margin:4px 0 0}}
 .mobile-nav{display:none}.admin-featured{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:750;color:#23689c;white-space:nowrap}.admin-featured input{accent-color:#036fe8}
 @media(max-width:760px){.mobile-nav{display:flex;justify-content:space-around;gap:3px;background:#fff;box-shadow:0 2px 12px #0d2d5112;position:sticky;top:0;z-index:25;padding:7px 8px}.mobile-nav button{border:0;background:transparent;color:#63819b;font-size:11px;font-weight:800;border-radius:8px;padding:10px 12px}.mobile-nav button.active{background:#e5f2ff;color:#075dbd}}
+
+.filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:14px 0;color:inherit}
+.filter-row select{margin-left:5px;padding:8px;background:#fff;color:#122942;border:1px solid #aebfd1;border-radius:6px}
+.futures-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:10px;margin-bottom:20px}
+.future-card{display:flex;align-items:center;gap:10px;padding:12px;margin:0}
+.future-card img{width:44px;height:48px;border-radius:7px;object-fit:cover}
+.future-card div{flex:1}
+.future-card small{display:block;margin-top:4px;color:#51637a}
+.ticket-status.void{background:#e5ebf3;color:#344d69}
+.standings-mobile-wrap{overflow-x:auto}
+.standing-table td,.standing-table th{white-space:nowrap}
+.ticket-row time{font-size:.8rem;color:#51637a}
+.mobile-nav{overflow-x:auto}
+.mobile-nav button{flex-shrink:0;white-space:nowrap}

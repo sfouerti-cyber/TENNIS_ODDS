@@ -1,0 +1,5 @@
+/data/
+db.json
+*.bak
+*.tmp
+.env*

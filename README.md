@@ -29,11 +29,11 @@ There are **zero external npm dependencies**. Use `npm test` to run the integrat
 
 ## Fan features
 
-- View the **Week 2** matches with player photos and **live community lines**.
+- Browse the nine-week season, including set scores for completed matches and live prices for active markets.
 - Select one match winner for a straight pick, or combine 2–5 selections into a parlay. Stakes are always **virtual credits (CR)**.
 - Register a username and password. Each fan begins with **1,000 CR**.
 - Review all pending/won/lost tickets in **My Bets**.
-- Check standings after commissioner-confirmed results.
+- Follow league standings, the public credit leaderboard, and filterable betting activity. The public views include player usernames and virtual-credit activity.
 - The website checks for price updates every ~8 seconds. If another fan moves the line before your ticket is accepted, the server **rejects the stale price** so you can review the new payout. Tickets that are accepted **lock their exact odds** for settlement.
 - Both sides of a matchup cannot appear on the same ticket.
 
@@ -47,7 +47,9 @@ Sign in with username `admin` and the password from `BTA_ADMIN_PASSWORD`. The co
 4. Set **maximum shift** from fair reference probability (0–12 points, default 8).
 5. Publish adjusted odds to everybody on the hosted server.
 6. Enter independently confirmed match winners or void an event, which settles affected tickets automatically.
-7. Create next week, edit matchups, and open its markets once the schedule is correct. New weeks start **closed** to avoid accepting incomplete picks.
+7. Advance to the next scheduled week and publish its markets when ready. Advancing closes both the previous and new weeks.
+8. Review all tickets by player, credit activity, aggregate pending exposure, standings, and championship futures.
+9. Review backfilled results attached to existing pending bets. A confirmation settles those tickets at their accepted prices.
 
 ## How the dynamic odds work
 
@@ -73,6 +75,12 @@ This is a transparent **league-wide** simulated pricing model, not individualize
 
 **Important:** The website's *displayed* odds include the commissioner-configured vig and any market-wide line movement, so they will differ from the original reference odds above.
 
+## Championship futures
+
+The model combines each player's match record and remaining schedule. For each remaining matchup it averages two estimates: the normalized implied probability from the reference moneylines and the relative smoothed win rates, where a player's smoothed win rate is `(wins + 2) / (wins + losses + 4)`. It simulates 8,192 seasons with a fixed random seed and a one- or two-set victory margin. Standings and futures settlement rank by match wins, then set differential, then alphabetical full name.
+
+The shares of simulated championships sum to one. Decimal payouts use reciprocal probabilities rounded down to cents. Outcomes with no feasible quoted payout appear unpriced. The simulation is an estimate, and a zero count means the simulated sample produced no wins for that outcome. Futures are straight bets and their accepted decimal prices are immutable. The market closes when the scheduled fixtures are complete, and settlement waits for missing scores and historical reviews.
+
 ## Player photographs
 
 The included `public/assets/*.webp` files are optimized crops of the user-supplied portraits and use the latest photo supplied for **Eric**. The roster has Jack, Jacob Ebani, Joe D, Joey, Fish, Vic, Ryan, Soly, Morris, and Eric. The BTA electric-blue logo is included. Ensure your league has each person's permission before publishing their photo publicly.
@@ -82,13 +90,21 @@ The included `public/assets/*.webp` files are optimized crops of the user-suppli
 The app saves accounts, hashed passwords, login sessions, balances, bet receipts, settlement, market prices, and odds history on the **server**, not in each visitor's browser.
 
 - Default data store: `data/db.json` (generated on first run; intentionally not included in the download).
-- Optional location: set `BTA_DATA_FILE=/your/persistent/volume/db.json`.
+- For Railway production, set `BTA_DATA_FILE=/data/db.json` on the existing volume. Production startup requires an existing, recognized file and refuses to create an empty one.
 - Required production environment variable: `BTA_ADMIN_PASSWORD`.
 - Required hosting: Node 20+, **HTTPS**, **persistent writable storage**. Set host `PORT` if required.
-- Use the command `npm start`. If hosting publicly, connect a custom domain, run one server instance, and preserve the data volume across deployments.
+- Use the command `npm start`. Run one server instance and preserve the data volume across deployments. The read-only `/health` route returns HTTP 200 after the server loads the store successfully.
 - This JSON-file store is suitable for a small-league fan demo on one server. For larger use, migrate to a transactional database and add production-grade account recovery, monitoring, backups, abuse protection, and automated market-close schedules.
 
 **Do not publish your password, `data/db.json`, or any user data to GitHub.** `.gitignore` excludes the live data file. A public deployment should have rate limits, reliable backups, HTTPS, and proper admin credential storage.
+
+### Production migration
+
+Before deployment, verify the live file and compare accounts, balances, and tickets against the known private backup. Take a fresh private volume backup and confirm there is free space for the original file, migrated file, and an atomic-write temporary copy. Schema 1 is copied byte-for-byte to `db.json.pre-season.bak` with mode `0600` before migration. The schema-2 write uses a same-directory temporary file and an atomic rename. Startup leaves missing or invalid production stores untouched.
+
+Migration keeps the current week, existing fixture IDs and results, account records, passwords, sessions, tickets, and balances. Canonical fixtures match existing player pairs within a week. Extra legacy fixtures remain available in history and are excluded from round-robin standings. A pending ticket tied to a newly backfilled outcome requires commissioner confirmation before that outcome is used to settle it. Conflicting legacy winners are retained and can be given their verified missing set score from the commissioner dashboard.
+
+Keep backups private and outside Git. If rollback becomes necessary after new bets have been accepted, preserve the live file first and reconcile post-migration activity before any restore.
 
 ### User support and rule caveats
 
