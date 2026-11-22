@@ -97,11 +97,12 @@ function settleTickets() {
   const user = db.users.find(u => u.id === ticket.userId);
   if (!user) continue;
   const week = db.weeks.find(w => w.week === ticket.week);
-  const results = ticket.legs.map(leg => {
-   if (leg.matchId === futuresMarketId) return futures().winner;
-   const match = week?.matches.find(m => m.id === leg.matchId);
-   return match?.historicalReview ? null : match?.winner ?? null;
-  });
+  const matches = ticket.legs.map(leg => week?.matches.find(m => m.id === leg.matchId));
+  // Even a confirmed losing leg must wait while another leg is under review.
+  if (matches.some(m => m?.historicalReview)) continue;
+  const results = ticket.legs.map((leg,i) =>
+   leg.matchId === futuresMarketId ? futures().winner : matches[i]?.winner ?? null
+  );
   if (results.some((r,i) => r && r !== 'void' && r !== ticket.legs[i].playerId)) {
    ticket.status = 'lost';
   } else if (results.every(r => r !== null)) {
@@ -358,4 +359,4 @@ const server=http.createServer((req,res)=>{
   fs.createReadStream(f).pipe(res);
  });
 });
-server.listen(PORT,()=>console.log(`BTA Tennis free-to-play sportsbook running at http://localhost:${PORT}\nAdmin login: username admin; set BTA_ADMIN_PASSWORD to enable.`));
+server.listen(PORT,()=>console.log(`BTA Tennis free-to-play sportsbook running at http://localhost:${server.address().port}\nAdmin login: username admin; set BTA_ADMIN_PASSWORD to enable.`));

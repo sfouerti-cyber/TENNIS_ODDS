@@ -120,3 +120,69 @@ test('migration preserves private records and backup through repeated startup', 
   await startAndStop();
   assert.equal(fs.readFileSync(dbPath,'utf8'),migrated);
 });
+
+test('historical parlays remain untouched until every backfilled result is confirmed', async t => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(),'bta-historical-parlays-'));
+  t.after(() => fs.rmSync(tmp,{recursive:true,force:true}));
+  const dbPath = path.join(tmp,'db.json');
+  const original = sampleStore();
+  const week = original.weeks[0];
+  week.matches[1].winner = null;
+  const base = {week:2,userId:'fan',status:'pending',stake:25,projectedPayout:100,
+    payout:0,settledAt:null};
+  const parlay = (id, pick) => ({...base,id,legs:[
+    {matchId:'legacy-id',playerId:pick,odds:100,decimal:2},
+    {matchId:'w2m5',playerId:'eric',odds:100,decimal:2}
+  ]});
+  const winning = parlay('winning','vic');
+  const losing = parlay('losing','fish');
+  const paid = original.tickets.find(ticket => ticket.id==='paid');
+  original.tickets = [winning,losing,paid];
+  fs.writeFileSync(dbPath,JSON.stringify(original));
+
+  const child = spawn(process.execPath,['server.js'],{cwd:__dirname,env:environment(dbPath)});
+  t.after(async () => {
+    if (child.exitCode !== null || child.signalCode !== null) return;
+    const exited = once(child,'exit');
+    child.kill();
+    await exited;
+  });
+  const [line] = await Promise.race([once(child.stdout,'data'),once(child,'exit')]);
+  const port = String(line).match(/localhost:(\d+)/)?.[1];
+  assert.ok(Number(port)>0,'fixture server must report its listening port');
+  const post = (endpoint, body, cookie) => fetch(`http://127.0.0.1:${port}${endpoint}`,{
+    method:'POST', headers:{'Content-Type':'application/json',...(cookie?{cookie}:{})},
+    body:JSON.stringify(body)
+  });
+  const read = () => JSON.parse(fs.readFileSync(dbPath,'utf8'));
+  const migrated = read();
+  assert.deepEqual(migrated.users,original.users);
+  assert.deepEqual(migrated.tickets,original.tickets);
+  assert.equal(migrated.weeks.find(w => w.week===2).matches.filter(m => m.historicalReview).length,2);
+
+  const login = await post('/api/login',{username:'admin',password:'fixture-admin-password'});
+  assert.equal(login.status,200);
+  const cookie = login.headers.get('set-cookie').split(';')[0];
+  const confirm = async (matchId,winner,setScore) => {
+    const response = await post('/api/admin/result',{week:2,matchId,winner,setScore},cookie);
+    assert.equal(response.status,200,await response.text());
+  };
+  await confirm('legacy-id','vic',[2,0]);
+  await confirm('legacy-id','vic',[2,0]);
+  const held = read();
+  assert.equal(held.weeks.find(w => w.week===2).matches.filter(m => m.historicalReview).length,1);
+  assert.deepEqual(held.tickets,original.tickets);
+  assert.deepEqual(held.users,original.users);
+
+  await confirm('w2m5','eric',[0,2]);
+  const settled = read();
+  assert.deepEqual(settled.tickets.map(t => t.status),['won','lost','won']);
+  assert.deepEqual(settled.tickets.map(t => t.payout),[100,0,20]);
+  assert.ok(settled.tickets.slice(0,2).every(t => Number.isFinite(t.settledAt)));
+  assert.deepEqual(settled.tickets[2],paid);
+  assert.equal(settled.users[0].balance,1010);
+
+  await confirm('w2m5','eric',[0,2]);
+  await confirm('legacy-id','vic',[2,0]);
+  assert.deepEqual(read(),settled);
+});
