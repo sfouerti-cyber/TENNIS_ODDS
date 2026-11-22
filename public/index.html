@@ -11,24 +11,24 @@
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <div class="top-ticker"><span class="live-dot"></span> BTA TENNIS TOUR <span class="ticker-dot">✦</span> WEEKLY MATCHUPS <span class="ticker-dot">✦</span> PLAY FOR BRAGGING RIGHTS <span class="top-ticker-right">FREE-TO-PLAY • NO REAL MONEY</span></div>
+  <div class="top-ticker"><span class="live-dot"></span> BTA TENNIS TOUR <span class="ticker-dot">✦</span> WEEKLY MATCHUPS <span class="ticker-dot">✦</span> PLAY FOR BRAGGING RIGHTS <span class="top-ticker-right">NON-REDEEMABLE BTA CREDITS</span></div>
   <header class="site-header">
     <div class="brand" role="button" tabindex="0" id="brandHome"><img src="/assets/bta-logo.webp" alt="BTA logo"/><span><b>BTA</b><small>SPORTSBOOK</small></span></div>
-    <nav class="header-tabs" aria-label="Site navigation"><button class="nav-link active" data-route="markets">Sportsbook</button><button class="nav-link" data-route="bets">My Bets</button><button class="nav-link" data-route="standings">Standings</button></nav>
-    <div class="header-right"><span class="pill-free"><span class="live-dot"></span> PLAY MONEY</span><button class="wallet" id="walletButton">◎ <span id="balanceLabel">1,000</span> <small>CR</small></button><button class="account-btn" id="accountButton">Sign in <span>↗</span></button></div>
+    <nav class="header-tabs" aria-label="Site navigation"><button class="nav-link active" data-route="markets">Sportsbook</button><button class="nav-link" data-route="bets">My Bets</button><button class="nav-link" data-route="standings">Standings</button><button class="nav-link" data-route="futures">Futures</button><button class="nav-link" data-route="credits">Credits</button><button class="nav-link" data-route="activity">Activity</button></nav>
+    <div class="header-right"><span class="pill-free"><span class="live-dot"></span> VIRTUAL CREDITS</span><button class="wallet" id="walletButton">◎ <span id="balanceLabel">—</span> <small>CR</small></button><button class="account-btn" id="accountButton">Sign in <span>↗</span></button></div>
   </header>
   <nav class="mobile-nav" aria-label="Mobile site navigation">
     <button data-route="markets" class="active">🎾 Matchups</button>
     <button data-route="bets">◈ My Bets</button>
     <button data-route="standings">▤ Standings</button>
-  </nav>
+  <button class="nav-link" data-route="futures">Futures</button><button class="nav-link" data-route="credits">Credits</button><button class="nav-link" data-route="activity">Activity</button></nav>
   <div class="layout">
     <aside class="left-sidebar">
       <div class="sidebar-section-label">DISCOVER</div>
       <button class="side-item active" data-route="markets"><span class="side-ico">◈</span> Live Markets <span class="side-chevron">›</span></button>
       <button class="side-item" data-route="bets"><span class="side-ico">▤</span> My Bet History</button>
       <button class="side-item" data-route="standings"><span class="side-ico">▥</span> League Standings</button>
-      <div class="sidebar-divider"></div>
+      <button class="side-item" data-route="futures">Futures</button><button class="side-item" data-route="credits">Credits</button><button class="side-item" data-route="activity">Activity</button><div class="sidebar-divider"></div>
       <div class="sidebar-section-label">YOUR LEAGUE</div>
       <div class="league-sidebar-card"><span class="tag-sport">🎾 TENNIS</span><strong>BTA Tennis League</strong><span>2026 season</span><div class="side-stats"><span><strong id="leftMatchCount">5</strong> Matchups</span><span><strong>10</strong> Players</span></div></div>
       <div class="sidebar-divider"></div>
